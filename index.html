@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>World Editor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>World Editor</h1>
+    <canvas id="myCanvas"></canvas>
+    <div id="controls">
+      <button onclick="save()">💾</button>
+      <button onclick="dispose()">🗑️</button>
+    </div>
+
+    <script src="scripts/world.js"></script>
+    <script src="scripts/viewport.js"></script>
+    <script src="scripts/graphEditor.js"></script>
+    <script src="scripts/maths/graph.js"></script>
+    <script src="scripts/maths/utils.js"></script>
+    <script src="scripts/maths/primitives/point.js"></script>
+    <script src="scripts/maths/primitives/segment.js"></script>
+    <script src="scripts/maths/primitives/polygon.js"></script>
+    <script src="scripts/maths/primitives/envelope.js "></script>
+    <script>
+      myCanvas.width = 600;
+      myCanvas.height = 600;
+
+      const ctx = myCanvas.getContext("2d");
+
+      const graphString = localStorage.getItem("graph");
+      const graphInfo = graphString
+        ? Graph.fromJSON(JSON.parse(graphString))
+        : new Graph();
+      const graph = graphInfo
+        ? new Graph(graphInfo.points, graphInfo.segments)
+        : new Graph();
+      const world = new World(graph);
+      const viewport = new Viewport(myCanvas);
+      const editor = new GraphEditor(viewport, graph);
+
+      animate();
+
+      function animate() {
+        viewport.reset();
+        world.generate();
+        world.draw(ctx);
+        ctx.globalAlpha = 0.3;
+        editor.draw();
+        requestAnimationFrame(animate);
+      }
+
+      function dispose() {
+        editor.dispose();
+      }
+
+      function save() {
+        localStorage.setItem("graph", JSON.stringify(graph));
+      }
+    </script>
+  </body>
+</html>
