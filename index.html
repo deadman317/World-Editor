@@ -38,11 +38,15 @@
       const viewport = new Viewport(myCanvas);
       const editor = new GraphEditor(viewport, graph);
 
+      let oldGraphHash = graph.hash();
       animate();
 
       function animate() {
         viewport.reset();
-        world.generate();
+        if (oldGraphHash != graph.hash()) {
+          world.generate();
+          oldGraphHash = graph.hash();
+        }
         world.draw(ctx);
         ctx.globalAlpha = 0.3;
         editor.draw();

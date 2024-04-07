@@ -31,7 +31,11 @@ class Polygon {
 
   containsSegment(seg) {
     const midPoint = average(seg.p1, seg.p2);
-    return pointInsidePolygon(midPoint, this);
+    return this.containsPoint(midPoint);
+  }
+
+  containsPoint(point) {
+    return pointInsidePolygon(point, this);
   }
 
   static multiBreak(polygons) {
@@ -59,6 +63,25 @@ class Polygon {
         }
       }
     }
+  }
+
+  distanceToPoint(point) {
+    return Math.min(...this.segments.map((seg) => seg.distanceToPoint(point)));
+  }
+
+  distanceToPoly(poly) {
+    return Math.min(...this.points.map((point) => poly.distanceToPoint(point)));
+  }
+
+  intersectsPoly(poly) {
+    for (const seg of this.segments) {
+      for (const seg2 of poly.segments) {
+        if (getIntersection(seg, seg2)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   drawSegments(ctx) {
