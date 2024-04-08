@@ -49,10 +49,11 @@ class Segment {
     return projection;
   }
 
-  draw(ctx, { width = 3, color = "black", dash = [] } = {}) {
+  draw(ctx, { width = 3, color = "black", dash = [], cap = "butt" } = {}) {
     ctx.beginPath();
     ctx.lineWidth = width;
     ctx.strokeStyle = color;
+    ctx.lineCap = cap;
     ctx.setLineDash(dash);
     ctx.moveTo(this.p1.x, this.p1.y);
     ctx.lineTo(this.p2.x, this.p2.y);

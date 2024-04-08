@@ -11,6 +11,19 @@ function getNearestPoint(loc, points, threshold = Infinity) {
   return nearestPoint;
 }
 
+function getNearestSegment(loc, segments, threshold = Infinity) {
+  let minDist = Infinity;
+  let nearestSegment = null;
+  for (const segment of segments) {
+    const dist = segment.distanceToPoint(loc);
+    if (dist < minDist && dist < threshold) {
+      minDist = dist;
+      nearestSegment = segment;
+    }
+  }
+  return nearestSegment;
+}
+
 function distance(p1, p2) {
   return Math.hypot(p1.x - p2.x, p1.y - p2.y);
 }
@@ -43,6 +56,10 @@ function magnitude(p) {
   return Math.hypot(p.x, p.y);
 }
 
+function perpendicular(p) {
+  return new Point(-p.y, p.x);
+}
+
 function translate(loc, angle, offset) {
   return new Point(
     loc.x + offset * Math.cos(angle),
@@ -50,12 +67,19 @@ function translate(loc, angle, offset) {
   );
 }
 
-function angleBetween(p1, p2) {
-  return Math.atan2(p1.y - p2.y, p1.x - p2.x);
+function angle(p) {
+  return Math.atan2(p.y, p.x);
 }
 
 function linearInterpolation(a, b, t) {
   return a + (b - a) * t;
+}
+
+function linearInterpolation2D(p1, p2, t) {
+  return new Point(
+    linearInterpolation(p1.x, p2.x, t),
+    linearInterpolation(p1.y, p2.y, t)
+  );
 }
 
 function getIntersection(seg1, seg2) {
@@ -106,4 +130,11 @@ function pointInsidePolygon(point, polygon) {
 
 function getRandomColor() {
   return `hsl(${Math.random() * 360}, 100%, 50%)`;
+}
+
+function getFake3DPoint(point, viewPoint, height) {
+  const dir = normalize(sub(point, viewPoint));
+  const dist = distance(point, viewPoint);
+  const scaler = Math.atan(dist / 700) / (Math.PI / 2);
+  return add(point, scale(dir, height * scaler));
 }

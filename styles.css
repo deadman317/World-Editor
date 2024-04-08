@@ -12,3 +12,15 @@ h1 {
 #myCanvas {
   background-color: #2a5;
 }
+
+button {
+  background-color: blue;
+  color: white;
+  font-size: 20px;
+  font-family: "Arial";
+  border: none;
+  border-radius: 5px;
+  padding: 5px 7px;
+  margin-top: 20px;
+  cursor: pointer;
+}

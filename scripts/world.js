@@ -20,6 +20,11 @@ class World {
     this.roadBorders = [];
     this.buildings = [];
     this.trees = [];
+    this.laneGuides = [];
+
+    this.markings = [];
+
+    this.frameCount = 0;
 
     this.generate();
   }
@@ -35,12 +40,25 @@ class World {
     this.roadBorders = Polygon.union(this.envelopes.map((env) => env.poly));
     this.buildings = this.#generateBuildings();
     this.trees = this.#generateTrees();
+    this.laneGuides.length = 0;
+    this.laneGuides = this.#generateLaneGuides();
+  }
+
+  #generateLaneGuides() {
+    const tempEnvelopes = [];
+    for (const seg of this.graph.segments) {
+      tempEnvelopes.push(
+        new Envelope(seg, this.roadWidth / 2, this.roadRoundness)
+      );
+    }
+    const segs = Polygon.union(tempEnvelopes.map((env) => env.poly));
+    return segs;
   }
 
   #generateTrees() {
     const points = [
       ...this.roadBorders.map((seg) => [seg.p1, seg.p2]).flat(),
-      ...this.buildings.map((poly) => poly.points).flat(),
+      ...this.buildings.map((building) => building.base.points).flat(),
     ];
 
     const left = Math.min(...points.map((p) => p.x));
@@ -50,7 +68,7 @@ class World {
 
     const illegalPolys = [
       ...this.envelopes.map((env) => env.poly),
-      ...this.buildings,
+      ...this.buildings.map((building) => building.base),
     ];
 
     const trees = [];
@@ -76,7 +94,7 @@ class World {
       //check if tree is too close to other trees
       if (legal) {
         for (const tree of trees) {
-          if (distance(tree, p) < this.treeSize) {
+          if (distance(tree.center, p) < this.treeSize) {
             legal = false;
             break;
           }
@@ -96,7 +114,7 @@ class World {
       }
 
       if (legal) {
-        trees.push(p);
+        trees.push(new Tree(p, this.treeSize));
         tryCount = 0;
       }
       tryCount++;
@@ -164,12 +182,72 @@ class World {
       }
     }
 
-    return bases;
+    return bases.map((base) => new Building(base));
   }
 
-  draw(ctx) {
+  #getIntersections() {
+    const intersections = [];
+    for (const point of this.graph.points) {
+      let degree = 0;
+      for (const seg of this.graph.segments) {
+        if (seg.includesPoint(point)) {
+          degree++;
+        }
+      }
+      if (degree > 2) {
+        intersections.push(point);
+      }
+    }
+    return intersections;
+  }
+
+  #updateLights() {
+    const lights = this.markings.filter((m) => m instanceof Light);
+    const controlCenters = [];
+    for (const light of lights) {
+      const point = getNearestPoint(light.center, this.#getIntersections());
+      let controlCenter = controlCenters.find((c) => c.equals(point));
+      if (!controlCenter) {
+        controlCenter = new Point(point.x, point.y);
+        controlCenter.lights = [light];
+        controlCenters.push(controlCenter);
+      } else {
+        controlCenter.lights.push(light);
+      }
+    }
+    const greenDuration = 2,
+      yellowDuration = 1;
+    for (const center of controlCenters) {
+      center.ticks = center.lights.length * (greenDuration + yellowDuration);
+    }
+    const tick = Math.floor(this.frameCount / 60);
+    for (const center of controlCenters) {
+      const cTick = tick % center.ticks;
+      const greenYellowIDX = Math.floor(
+        cTick / (greenDuration + yellowDuration)
+      );
+      const greenOrYellow =
+        cTick % (greenDuration + yellowDuration) < greenDuration
+          ? "green"
+          : "yellow";
+      for (let i = 0; i < center.lights.length; i++) {
+        if (i == greenYellowIDX) {
+          center.lights[i].state = greenOrYellow;
+        } else {
+          center.lights[i].state = "red";
+        }
+      }
+    }
+    this.frameCount++;
+  }
+
+  draw(ctx, viewPoint) {
+    this.#updateLights();
     for (const env of this.envelopes) {
       env.draw(ctx, { fill: "#BBB", stroke: "#BBB", lineWidth: 15 });
+    }
+    for (const marking of this.markings) {
+      marking.draw(ctx);
     }
     for (const seg of this.graph.segments) {
       seg.draw(ctx, { color: "white", width: 4, dash: [10, 10] });
@@ -177,11 +255,14 @@ class World {
     for (const seg of this.roadBorders) {
       seg.draw(ctx, { color: "white", width: 4 });
     }
-    for (const bld of this.buildings) {
-      bld.draw(ctx);
-    }
-    for (const tree of this.trees) {
-      tree.draw(ctx, { size: this.treeSize, color: "rgba(0, 0, 0, 0.5)" });
+
+    const items = [...this.buildings, ...this.trees];
+    items.sort(
+      (a, b) =>
+        b.base.distanceToPoint(viewPoint) - a.base.distanceToPoint(viewPoint)
+    );
+    for (const item of items) {
+      item.draw(ctx, viewPoint);
     }
   }
 }
