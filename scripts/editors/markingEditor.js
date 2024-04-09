@@ -59,11 +59,11 @@ class MarkingEditor {
   }
 
   #handleMouseDown(e) {
-    if (e.button === 0 && this.intent) {
+    if (e.button == 0 && this.intent) {
       this.markings.push(this.intent);
       this.intent = null;
     }
-    if (e.button === 2) {
+    if (e.button == 2) {
       for (let i = 0; i < this.markings.length; i++) {
         if (this.markings[i].poly.containsPoint(this.mouse)) {
           this.markings.splice(i, 1);

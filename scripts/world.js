@@ -41,7 +41,7 @@ class World {
     this.buildings = this.#generateBuildings();
     this.trees = this.#generateTrees();
     this.laneGuides.length = 0;
-    this.laneGuides = this.#generateLaneGuides();
+    this.laneGuides.push(...this.#generateLaneGuides());
   }
 
   #generateLaneGuides() {
