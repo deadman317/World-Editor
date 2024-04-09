@@ -1,4 +1,4 @@
-class YieldEditor extends markingEditor {
+class YieldEditor extends MarkingEditor {
   constructor(viewport, world) {
     super(viewport, world, world.laneGuides);
   }

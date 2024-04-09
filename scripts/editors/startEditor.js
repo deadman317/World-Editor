@@ -1,4 +1,4 @@
-class StartEditor extends markingEditor {
+class StartEditor extends MarkingEditor {
   constructor(viewport, world) {
     super(viewport, world, world.laneGuides);
   }

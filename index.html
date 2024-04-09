@@ -132,9 +132,9 @@
 
       function setMode(mode) {
         dissableEditors();
-        tools[mode].editor.enable();
         tools[mode].button.style.backgroundColor = "blue";
         tools[mode].button.style.filter = "grayscale(0%)";
+        tools[mode].editor.enable();
       }
 
       function dissableEditors() {

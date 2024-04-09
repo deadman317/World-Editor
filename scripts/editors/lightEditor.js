@@ -1,4 +1,4 @@
-class LightEditor extends markingEditor {
+class LightEditor extends MarkingEditor {
   constructor(viewport, world) {
     super(viewport, world, world.laneGuides);
   }

@@ -1,4 +1,4 @@
-class CrossingEditor extends markingEditor {
+class CrossingEditor extends MarkingEditor {
   constructor(viewport, world) {
     super(viewport, world, world.graph.segments);
   }

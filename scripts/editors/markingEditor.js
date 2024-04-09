@@ -1,4 +1,4 @@
-class markingEditor {
+class MarkingEditor {
   constructor(viewport, world, targetSegments) {
     this.viewport = viewport;
     this.world = world;
