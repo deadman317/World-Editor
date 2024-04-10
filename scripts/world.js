@@ -29,6 +29,28 @@ class World {
     this.generate();
   }
 
+  static fromJSON(json) {
+    const world = new World(new Graph());
+    world.graph = Graph.fromJSON(json.graph);
+    world.roadWidth = json.roadWidth;
+    world.roadRoundness = json.roadRoundness;
+    world.buildingWidth = json.buildingWidth;
+    world.buildingMinLength = json.buildingMinLength;
+    world.spacing = json.spacing;
+    world.treeSize = json.treeSize;
+
+    world.envelopes = json.envelopes.map((env) => Envelope.fromJSON(env));
+    world.roadBorders = json.roadBorders.map((seg) => Segment.fromJSON(seg));
+    world.buildings = json.buildings.map((build) => Building.fromJSON(build));
+    world.trees = json.trees.map((tree) => Tree.fromJSON(tree));
+    world.laneGuides = json.laneGuides.map((seg) => Segment.fromJSON(seg));
+    world.markings = json.markings.map((mark) => Marking.fromJSON(mark));
+
+    world.zoom = json.zoom;
+    world.offset = json.offset;
+    return world;
+  }
+
   generate() {
     this.envelopes.length = 0;
     for (const seg of this.graph.segments) {

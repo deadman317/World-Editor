@@ -9,6 +9,10 @@ class Polygon {
     }
   }
 
+  static fromJSON(json) {
+    return new Polygon(json.points.map((point) => Point.fromJSON(point)));
+  }
+
   static union(polygons) {
     Polygon.multiBreak(polygons);
     const keptSegments = [];

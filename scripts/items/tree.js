@@ -6,6 +6,10 @@ class Tree {
     this.base = this.#generateLevel(center, size);
   }
 
+  static fromJSON(json) {
+    return new Tree(Point.fromJSON(json.center), json.size, json.height);
+  }
+
   #generateLevel(point, size) {
     const points = [];
     const radius = size / 2;

@@ -10,6 +10,15 @@
     <div id="controls">
       <button onclick="save()">💾</button>
       <button onclick="dispose()">🗑️</button>
+      <label for="fileInput" class="file-input-label"
+        >📂
+        <input
+          type="file"
+          id="fileInput"
+          accept=".json"
+          onchange="load(event)"
+        />
+      </label>
       &nbsp;
       <button id="graphBtn" onclick="setMode('graph')">🌐</button>
       <button id="stopBtn" onclick="setMode('stop')">🛑</button>
@@ -58,15 +67,15 @@
 
       const ctx = myCanvas.getContext("2d");
 
-      const graphString = localStorage.getItem("graph");
-      const graphInfo = graphString
-        ? Graph.fromJSON(JSON.parse(graphString))
-        : new Graph();
-      const graph = graphInfo
-        ? new Graph(graphInfo.points, graphInfo.segments)
-        : new Graph();
-      const world = new World(graph);
-      const viewport = new Viewport(myCanvas);
+      const worldString = localStorage.getItem("world");
+      const worldInfo = worldString ? JSON.parse(worldString) : null;
+      const world = worldInfo
+        ? World.fromJSON(worldInfo)
+        : new World(new Graph());
+      const graph = world.graph;
+      const viewport = new Viewport(myCanvas, world.zoom, world.offset);
+      let oldGraphHash = graph.hash();
+
       const tools = {
         graph: {
           button: graphBtn,
@@ -101,11 +110,9 @@
           editor: new YieldEditor(viewport, world),
         },
       };
+      dissableEditors();
 
-      let oldGraphHash = graph.hash();
-      setMode("graph");
       animate();
-
       function animate() {
         viewport.reset();
         if (oldGraphHash != graph.hash()) {
@@ -122,12 +129,39 @@
       }
 
       function dispose() {
+        // localStorage.removeItem("world");
         tools.graph.editor.dispose();
         world.markings = [];
       }
 
       function save() {
-        localStorage.setItem("graph", JSON.stringify(graph));
+        world.zoom = viewport.zoom;
+        world.offset = viewport.offset;
+
+        const element = document.createElement("a");
+        element.setAttribute(
+          "href",
+          "data:application/json;charset=utf-8," +
+            encodeURIComponent(JSON.stringify(world))
+        );
+        const fileName = "untitled.json";
+        element.setAttribute("download", fileName);
+        element.click();
+        localStorage.setItem("world", JSON.stringify(world));
+      }
+
+      function load(event) {
+        const file = event.target.files[0];
+        if (!file) {
+          alert("No file selected");
+          return;
+        }
+        const reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = function (e) {
+          localStorage.setItem("world", e.target.result);
+          location.reload();
+        };
       }
 
       function setMode(mode) {

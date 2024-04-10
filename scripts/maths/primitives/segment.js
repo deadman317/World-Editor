@@ -4,11 +4,8 @@ class Segment {
     this.p2 = p2;
   }
 
-  static fromJSON(json, points) {
-    return new Segment(
-      points.find((p) => p.equals(json.p1)),
-      points.find((p) => p.equals(json.p2))
-    );
+  static fromJSON(json) {
+    return new Segment(Point.fromJSON(json.p1), Point.fromJSON(json.p2));
   }
 
   length() {

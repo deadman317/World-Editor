@@ -5,8 +5,13 @@ class Graph {
   }
 
   static fromJSON(json) {
-    const points = json.points.map((p) => Point.fromJSON(p));
-    const segments = json.segments.map((s) => Segment.fromJSON(s, points));
+    const points = json.points.map((point) => Point.fromJSON(point));
+    const segments = json.segments.map((seg) => {
+      return new Segment(
+        points.find((p) => p.equals(seg.p1)),
+        points.find((p) => p.equals(seg.p2))
+      );
+    });
     return new Graph(points, segments);
   }
 

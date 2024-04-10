@@ -4,6 +4,10 @@ class Building {
     this.height = height;
   }
 
+  static fromJSON(json) {
+    return new Building(Polygon.fromJSON(json.base), json.height);
+  }
+
   draw(ctx, viewPoint) {
     const topPoints = this.base.points.map((p) =>
       getFake3DPoint(p, viewPoint, this.height * 0.6)
